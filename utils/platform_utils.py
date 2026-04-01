@@ -24,9 +24,30 @@ def get_home_dir() -> Path:
     return Path.home()
 
 
-def get_codex_dir() -> Path:
-    """Get the Codex config directory"""
-    return get_home_dir() / '.codex'
+def get_project_root(start_dir: Optional[Path] = None) -> Optional[Path]:
+    """Find the nearest project root using common repo markers."""
+    current = Path(start_dir or Path.cwd()).expanduser().resolve()
+    markers = ('.git', '.codex', 'AGENTS.md', 'package.json', '.claude-plugin')
+
+    while True:
+        if any((current / marker).exists() for marker in markers):
+            return current
+        if current.parent == current:
+            return None
+        current = current.parent
+
+
+def get_codex_dir(start_dir: Optional[Path] = None) -> Path:
+    """Get the Codex config directory, preferring project-local installs."""
+    env_home = os.environ.get('CODEX_HOME')
+    if env_home:
+        return Path(env_home).expanduser().resolve()
+
+    project_root = get_project_root(start_dir)
+    if project_root is not None:
+        return project_root / '.codex'
+
+    return (Path(start_dir) if start_dir else Path.cwd()).expanduser().resolve() / '.codex'
 
 
 def get_temp_dir() -> Path:
@@ -295,6 +316,7 @@ __all__ = [
 
     # Directories
     'get_home_dir',
+    'get_project_root',
     'get_codex_dir',
     'get_temp_dir',
     'get_plan_dir',

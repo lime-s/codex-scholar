@@ -5,9 +5,9 @@
 **Codex Scholar** - 面向学术研究和软件开发的 semi-automated research assistant（Codex CLI 版）
 
 **配置路径**:
-- 主配置：`~/.codex/config.toml`
-- Agent 配置：`~/.codex/agents/<name>/`
-- Skills 目录：项目根目录 `skills/`
+- 首选主配置：项目根目录 `.codex/config.toml`
+- 首选 Agent 配置：项目根目录 `.codex/agents/<name>/`
+- Skills 目录：安装目录 `.codex/skills/`
 - 本文件：项目根目录 `AGENTS.md`（Codex 自动读取）
 
 **Mission**: 覆盖完整的学术研究生命周期（从构思到发表）和软件开发工作流，同时提供插件开发和项目管理能力。
@@ -83,7 +83,7 @@
 ### 支撑工作流
 
 - **Zotero 集成**: 通过 Zotero MCP 服务器实现论文自动导入、集合管理、全文阅读和准确引用导出
-- **知识提取**: `paper-miner` 将论文中的可复用写作模式沉淀到一份全局 canonical writing memory；`kaggle-miner` 持续从竞赛方案中提取工程知识
+- **知识提取**: `paper-miner` 将论文中的可复用写作模式沉淀到当前项目的 canonical writing memory；`kaggle-miner` 持续从竞赛方案中提取工程知识
 - **Obsidian 知识库**: 已内置 filesystem-first 项目知识库工作流；当仓库已绑定 project memory 时，应默认把 Obsidian 视为该科研项目的 durable knowledge sink
 - **技能进化**: `skill-development` → `skill-quality-reviewer` → `skill-improver` 三步改进循环
 
@@ -302,9 +302,9 @@ For complex problems, use split-role sub-agents:
 - 提供网络隔离保护
 
 ### 配置文件路径
-- 主配置：`~/.codex/config.toml`
-- Agent 配置：`~/.codex/agents/<name>/config.toml`
-- Skills：项目 `skills/` 目录，在 config.toml 中注册
+- 主配置：优先读取项目 `.codex/config.toml`
+- Agent 配置：优先读取项目 `.codex/agents/<name>/config.toml`
+- Skills：使用项目 `.codex/skills/`
 
 ---
 

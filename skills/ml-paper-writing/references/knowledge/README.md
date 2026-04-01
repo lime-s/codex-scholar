@@ -27,7 +27,7 @@ This memory is:
 - **cross-project**,
 - **not project-specific**.
 
-If `paper-miner` is invoked inside a project, it may use project context to understand relevance, but it still writes only to the global memory.
+If `paper-miner` is invoked inside the project, it may use project context to understand relevance, but it still writes only to the project's canonical writing memory.
 
 ## Legacy files
 

@@ -61,7 +61,7 @@ function getProjectConfigPath() {
 }
 
 /**
- * 获取全局配置文件路径
+ * 获取 Codex home 配置文件路径
  * @returns {string} 配置文件路径
  */
 function getGlobalConfigPath() {
@@ -96,7 +96,7 @@ function detectFromProjectConfig() {
 }
 
 /**
- * 从全局配置检测包管理器
+ * 从 Codex home 配置检测包管理器
  * @returns {string|null} 包管理器名称或 null
  */
 function detectFromGlobalConfig() {
@@ -257,7 +257,7 @@ function setProjectPackageManager(packageManager) {
 }
 
 /**
- * 设置全局包管理器
+ * 设置 Codex home 包管理器
  * @param {string} packageManager - 包管理器名称
  * @returns {boolean} 是否成功
  */

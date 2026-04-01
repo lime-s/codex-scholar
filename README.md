@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Codex_CLI-Compatible-blue?style=flat-square" alt="Codex CLI"/>
   </p>
 
-  <strong>Language</strong>: <a href="README.md">English</a> | <a href="README.zh-CN.md">中文</a> | <a href="README.ja-JP.md">日本語</a>
+  <strong>Language</strong>: <a href="README.md">English</a> | <a href="README.zh-CN.md">中文</a>
 </div>
 
 > Semi-automated research assistant for academic research and software development, especially for computer science and AI researchers, adapted for [Codex CLI](https://github.com/openai/codex) across ideation, literature review, experiments, reporting, writing, and project knowledge management.
@@ -18,16 +18,15 @@
 
 ## Recent News
 
-- **2026-03-31**: **Zotero smart-import workflow docs aligned** — updated Claude Scholar's research-facing docs around the latest `zotero-mcp` public surface: `zotero_add_items_by_identifier` is now the default paper-import path, `zotero_reconcile_collection_duplicates` is the standard post-import cleanup step, source-aware PDF cascade behavior is documented more accurately, and public vs internal diagnostics are now clearly separated.
-- **2026-03-31**: **README onboarding refreshed** — clarified that Claude Scholar is especially well-suited to computer science and AI researchers, added practical getting-started scenarios after installation, improved prerequisite and branch guidance, and made the “existing local md files must be manually merged” expectation much more explicit.
-- **2026-03-31**: **Installer and hook behavior tightened** — the installer now preserves existing local `AGENTS.md` while installing the repo-managed version as `AGENTS.scholar.md`, and the default hook summaries were trimmed to reduce noisy temp-file / uncommitted-file output while keeping safer write-guard behavior.
-- **2026-03-31**: **Japanese documentation added** — added Japanese docs for the main README plus `AGENTS`, `MCP_SETUP`, and `OBSIDIAN_SETUP`, so the Codex branch now has a more complete multilingual documentation surface.
+- **2026-03-18**: **Results reporting, writing memory, and README alignment** — kept the `results-analysis` / `results-report` split for strict statistics plus decision-oriented post-experiment reporting, kept Obsidian write-back in the Codex workflow, removed the old `data-analyst` entrypoint from the product story, wired `paper-miner` output into a shared writing memory used by `ml-paper-writing` and `review-response`, and aligned the Codex README structure with the main branch while preserving Codex-specific usage.
+- **2026-03-17**: **Obsidian project knowledge base** — ported the filesystem-first Obsidian workflow into the Codex edition with project import, repo-bound auto-sync, durable knowledge routed across `Papers / Knowledge / Experiments / Results / Writing`, with round-level experiment reports stored under `Results/Reports/`, and no MCP requirement on the Obsidian side.
+- **2026-02-26**: **Zotero MCP Web API mode** — remote Zotero access, DOI/arXiv/URL import, collection management, item updates, and Codex-specific setup guidance in `config.toml`.
 
 <details>
 <summary>View older changelog</summary>
 
 - **2026-02-25**: **Codex CLI migration** — ported the project into Codex CLI format with TOML config, agent directories, AGENTS-based instructions, and an incremental installer
-- **2026-02-23**: Added `setup.sh` installer — backup-aware incremental updates for existing `~/.codex`, with config preservation and optional Zotero MCP enablement
+- **2026-02-23**: Added `setup.sh` installer — backup-aware incremental updates for project-local `.codex/`, with config preservation and optional Zotero MCP enablement
 - **2026-02-22**: Added Zotero MCP server template — out-of-the-box literature workflow support in Codex
 - **2026-02-21**: OpenCode migration groundwork — clarified branch split between Claude Code, Codex, and OpenCode
 - **2026-02-15**: Zotero MCP integration — brought `/zotero-review` and `/zotero-notes` style literature workflows into the broader Claude Scholar line
@@ -42,8 +41,7 @@
 |---|---|
 | [Why Claude Scholar](#why-claude-scholar) | Understand the project positioning and target use cases. |
 | [Core Workflow](#core-workflow) | See the staged research pipeline from ideation to publication. |
-| [Quick Start](#quick-start) | Install Claude Scholar safely into an existing `~/.codex` setup. |
-| [Getting Started Scenarios](#getting-started-scenarios) | See a few realistic first-use scenarios after installation. |
+| [Quick Start](#quick-start) | Install Claude Scholar safely into the current project's `.codex/` setup. |
 | [Platform Scope](#platform-scope) | See what this branch covers and where the other editions live. |
 | [Integrations](#integrations) | Learn how Zotero and Obsidian fit into the Codex workflow. |
 | [Primary Workflows](#primary-workflows) | Browse the main research and development workflows. |
@@ -101,51 +99,54 @@ It can still help in other research settings, but its current workflow design is
 - (Optional) [Zotero](https://www.zotero.org/) + [Galaxy-Dawn/zotero-mcp](https://github.com/Galaxy-Dawn/zotero-mcp) for literature workflows
 - (Optional) [Obsidian](https://obsidian.md/) for project knowledge-base workflows
 
-### Option 1: Full Installation (Recommended)
+### Option 1: Project-local Installation (Recommended)
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-bash /tmp/claude-scholar/scripts/setup.sh
+bash /tmp/claude-scholar/scripts/setup.sh --project-dir ~/Downloads/codex-scholar
+cd ~/Downloads/codex-scholar
+./.codex/run-codex.sh
 ```
 
 The installer is **backup-aware and incremental-update friendly**:
+- installs Claude Scholar into the target project's `.codex/`,
 - syncs repo-managed `skills/`, `agents/`, `scripts/`, and `utils/`,
-- merges Claude Scholar sections into an existing `~/.codex/config.toml` when you keep your current provider/model,
-- backs up `config.toml` and `auth.json` before overwriting,
-- preserves an existing `~/.codex/AGENTS.md` and installs the repo-managed version as `~/.codex/AGENTS.scholar.md`,
+- merges Claude Scholar sections into the target project's `.codex/config.toml` when you keep your current provider/model,
+- backs up the project-local `config.toml` and `auth.json` before overwriting,
+- installs the repo `AGENTS.md` into the target project root so Codex can auto-load it,
+- generates `./.codex/run-codex.sh`, which exports a project-local `CODEX_HOME` so auth, sessions, and memories stay isolated with the project,
 - preserves your existing provider/model/API key when you choose the incremental-update path,
 - optionally enables the Zotero MCP block already present in the template config.
-
-**Important AGENTS note**: if you already maintain your own `~/.codex/AGENTS.md`, review `~/.codex/AGENTS.scholar.md` after installation and manually merge the Claude Scholar sections you want into your own `AGENTS.md`. Do not assume the sidecar file is applied automatically.
 
 To update later:
 
 ```bash
 cd /tmp/claude-scholar
 git pull --ff-only
-bash scripts/setup.sh
+bash scripts/setup.sh --project-dir ~/Downloads/codex-scholar
 ```
 
 **Windows**: please use Git Bash or WSL to run the installer.
 
-### Option 2: Minimal Installation
+### Option 2: Minimal Project-local Installation
 
 Install only a small research-focused subset:
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-mkdir -p ~/.codex/skills ~/.codex/agents
-cp -r /tmp/claude-scholar/skills/research-ideation ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/results-analysis ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/results-report ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/ml-paper-writing ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/review-response ~/.codex/skills/
-cp -r /tmp/claude-scholar/agents/literature-reviewer ~/.codex/agents/
-cp -r /tmp/claude-scholar/agents/paper-miner ~/.codex/agents/
-cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
+PROJECT_DIR=~/Downloads/codex-scholar
+mkdir -p "$PROJECT_DIR/.codex/skills" "$PROJECT_DIR/.codex/agents"
+cp -r /tmp/claude-scholar/skills/research-ideation "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/results-analysis "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/results-report "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/ml-paper-writing "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/review-response "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/agents/literature-reviewer "$PROJECT_DIR/.codex/agents/"
+cp -r /tmp/claude-scholar/agents/paper-miner "$PROJECT_DIR/.codex/agents/"
+cp /tmp/claude-scholar/AGENTS.md "$PROJECT_DIR/AGENTS.md"
 ```
 
-**Post-install**: minimal/manual install does **not** auto-merge your `config.toml`; copy only the sections you need from the repository config and setup guides. If you already have your own `~/.codex/AGENTS.md`, merge the relevant sections from this repo's `AGENTS.md` into your file instead of blindly overwriting it.
+**Post-install**: minimal/manual install does **not** auto-merge your `config.toml` and does not create the project-local launcher. Use the full installer if you want a fully isolated `CODEX_HOME`.
 
 ### Option 3: Selective Installation
 
@@ -153,69 +154,15 @@ Copy only the pieces you want:
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-cp -r /tmp/claude-scholar/skills/<skill-name> ~/.codex/skills/
-cp -r /tmp/claude-scholar/agents/<agent-name> ~/.codex/agents/
-cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
+PROJECT_DIR=~/Downloads/codex-scholar
+cp -r /tmp/claude-scholar/skills/<skill-name> "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/agents/<agent-name> "$PROJECT_DIR/.codex/agents/"
+cp /tmp/claude-scholar/AGENTS.md "$PROJECT_DIR/AGENTS.md"
 ```
-
-**Post-install**: selective/manual install does **not** auto-merge your `config.toml`, and if you already have your own `~/.codex/AGENTS.md`, merge the relevant sections from this repo's `AGENTS.md` into your file instead of blindly overwriting it.
 
 **Important Codex note**:
 - Codex does **not** show custom skills in `/...` menus.
 - Use natural language prompts, or explicitly invoke a skill as `$skill-name` when needed.
-
-## Getting Started Scenarios
-
-After installation, the simplest way to begin is to describe your task in natural language. You do not need to memorize the whole system first, and Codex does not require slash-menu discovery for these workflows. Below are a few realistic starting points.
-
-### 1. Start a New Research Topic
-**You can say:**
-> Help me start research on [your topic]. I want a literature-grounded plan, the key open questions, and the next concrete steps.
-
-**What Claude Scholar will typically help with:**
-- clarify the topic and narrow the research question,
-- identify promising literature directions,
-- suggest an initial plan or hypothesis list,
-- optionally route the work into Zotero or Obsidian if you use them.
-
-### 2. Review a Zotero Collection
-**You can say:**
-> Review my Zotero collection on brain foundation models and summarize the main directions, gaps, and promising next steps.
-
-**Typical output:**
-- paper grouping by theme,
-- a short literature synthesis,
-- gap analysis,
-- candidate research directions worth pursuing next.
-
-### 3. Analyze Finished Experiment Results
-**You can say:**
-> Analyze the results in this experiment folder, check what changed across runs, and write a decision-oriented summary.
-
-**Typical output:**
-- metric comparison,
-- ablation or error-analysis suggestions,
-- a result summary that highlights what is solid, what is weak, and what to run next.
-
-### 4. Draft a Paper or Rebuttal Section
-**You can say:**
-> Help me draft the related work section for this project based on the current findings and paper notes.
-
-or:
-
-> Help me write a rebuttal draft for these reviewer comments.
-
-**Typical output:**
-- a structured section draft,
-- improved argument flow,
-- clearer claims and evidence mapping,
-- follow-up points that still need support or verification.
-
-### Practical Notes
-- Start with one concrete task, not a vague request for "everything."
-- In Codex, natural-language prompts are the default entrypoint; use `$skill-name` only when you want to force a specific skill.
-- If you already maintain your own local `AGENTS.md`, merge the Claude Scholar sections you want from `AGENTS.scholar.md` instead of assuming sidecar files apply automatically.
-- Zotero and Obsidian are optional, but they become much more useful when you want durable literature notes or project memory rather than one-off chat output.
 
 ## Platform Scope
 
@@ -485,7 +432,6 @@ Claude Scholar also includes a self-improvement loop for its own skills.
 - [MCP_SETUP.md](./MCP_SETUP.md) — Zotero MCP setup for Codex
 - [OBSIDIAN_SETUP.md](./OBSIDIAN_SETUP.md) — Obsidian project knowledge base workflow
 - [AGENTS.md](./AGENTS.md) — Codex session rules, safety discipline, and workflow instructions
-- [README.ja-JP.md](./README.ja-JP.md) — Japanese version of this README
 - [config.toml](./config.toml) — template Codex configuration with skills, agents, and MCP blocks
 
 ## Project Rules

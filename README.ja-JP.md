@@ -27,7 +27,7 @@
 <summary>過去の更新履歴を表示</summary>
 
 - **2026-02-25**: **Codex CLI への移行** — プロジェクトを Codex CLI 形態へ移行し、TOML 設定、agent ディレクトリ、AGENTS ベースの作業規律、増分インストーラーを導入
-- **2026-02-23**: `setup.sh` インストーラー追加 — 既存 `~/.codex` 向けのバックアップ付き増分更新と、既存設定保持 + Zotero MCP 任意有効化に対応
+- **2026-02-23**: `setup.sh` インストーラー追加 — プロジェクト内 `.codex/` へのバックアップ付き増分更新と、既存設定保持 + Zotero MCP 任意有効化に対応
 - **2026-02-22**: Zotero MCP テンプレート追加 — Codex 上でそのまま使える文献ワークフローテンプレートを提供
 - **2026-02-21**: OpenCode 移行の土台整備 — Claude Code / Codex / OpenCode の 3 分岐の役割を明確化
 - **2026-02-15**: Zotero MCP 統合 — `/zotero-review`、`/zotero-notes` 系の文献ワークフローをより大きな Claude Scholar 主線に統合
@@ -42,7 +42,7 @@
 |---|---|
 | [なぜ Claude Scholar なのか](#なぜ-claude-scholar-なのか) | プロジェクトの位置づけと適用シーンを素早く把握する。 |
 | [コアワークフロー](#コアワークフロー) | 研究構想から投稿までの主線を確認する。 |
-| [クイックスタート](#クイックスタート) | 既存の `~/.codex` 環境へ安全に導入する。 |
+| [クイックスタート](#クイックスタート) | 現在のプロジェクト内 `.codex/` 環境へ安全に導入する。 |
 | [使い始めのシナリオ](#使い始めのシナリオ) | インストール後の代表的な使い始め方を見る。 |
 | [プラットフォーム範囲](#プラットフォーム範囲) | この分岐の対象範囲と他バージョンの所在を確認する。 |
 | [連携機能](#連携機能) | Zotero と Obsidian を Codex ワークフローへどう接続するかを確認する。 |
@@ -101,51 +101,54 @@ Claude Scholar は特に次のような人に向いています。
 - （任意）[Zotero](https://www.zotero.org/) + [Galaxy-Dawn/zotero-mcp](https://github.com/Galaxy-Dawn/zotero-mcp) — 文献ワークフロー用
 - （任意）[Obsidian](https://obsidian.md/) — プロジェクト知識ベース用
 
-### オプション 1：フルインストール（推奨）
+### オプション 1：プロジェクトローカルインストール（推奨）
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-bash /tmp/claude-scholar/scripts/setup.sh
+bash /tmp/claude-scholar/scripts/setup.sh --project-dir ~/Downloads/codex-scholar
+cd ~/Downloads/codex-scholar
+./.codex/run-codex.sh
 ```
 
 インストーラーは現在、**バックアップ付きの安全な増分更新**をサポートしています。
+- Claude Scholar を対象プロジェクトの `.codex/` にインストール
 - リポジトリ管理の `skills/`、`agents/`、`scripts/`、`utils/` を同期
-- 既存 provider/model を保持したい場合、Claude Scholar に必要な section を現在の `~/.codex/config.toml` にマージ
-- 上書き前に `config.toml` と `auth.json` を自動バックアップ
-- `~/.codex/AGENTS.md` が既に存在する場合は元ファイルを保持し、リポジトリ版を `~/.codex/AGENTS.scholar.md` として保存
+- 既存 provider/model を保持したい場合、Claude Scholar に必要な section を対象プロジェクトの `.codex/config.toml` にマージ
+- 上書き前にプロジェクト内の `config.toml` と `auth.json` を自動バックアップ
+- リポジトリの `AGENTS.md` を対象プロジェクトのルートに配置
+- `./.codex/run-codex.sh` を生成し、`CODEX_HOME` をプロジェクト内に固定
 - 増分更新パスでは既存の provider / model / API key を保持
 - テンプレート内にある Zotero MCP 設定ブロックを任意で有効化可能
-
-**重要な AGENTS 説明**：すでに自分用の `~/.codex/AGENTS.md` を持っている場合は、インストール後に `~/.codex/AGENTS.scholar.md` を確認し、必要な Claude Scholar の内容だけを自分の `AGENTS.md` に手動で merge してください。sidecar ファイルが自動で有効化されるとは考えないでください。
 
 以後の増分更新は次の通りです。
 
 ```bash
 cd /tmp/claude-scholar
 git pull --ff-only
-bash scripts/setup.sh
+bash scripts/setup.sh --project-dir ~/Downloads/codex-scholar
 ```
 
 **Windows**：インストーラーは Git Bash / WSL から実行してください。
 
-### オプション 2：最小インストール
+### オプション 2：最小プロジェクトローカルインストール
 
 研究ワークフローの小さめのサブセットだけを導入します。
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-mkdir -p ~/.codex/skills ~/.codex/agents
-cp -r /tmp/claude-scholar/skills/research-ideation ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/results-analysis ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/results-report ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/ml-paper-writing ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/review-response ~/.codex/skills/
-cp -r /tmp/claude-scholar/agents/literature-reviewer ~/.codex/agents/
-cp -r /tmp/claude-scholar/agents/paper-miner ~/.codex/agents/
-cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
+PROJECT_DIR=~/Downloads/codex-scholar
+mkdir -p "$PROJECT_DIR/.codex/skills" "$PROJECT_DIR/.codex/agents"
+cp -r /tmp/claude-scholar/skills/research-ideation "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/results-analysis "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/results-report "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/ml-paper-writing "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/review-response "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/agents/literature-reviewer "$PROJECT_DIR/.codex/agents/"
+cp -r /tmp/claude-scholar/agents/paper-miner "$PROJECT_DIR/.codex/agents/"
+cp /tmp/claude-scholar/AGENTS.md "$PROJECT_DIR/AGENTS.md"
 ```
 
-**インストール後**：最小化 / 手動インストールでは `config.toml` は**自動マージされません**。必要な section を setup 文書やリポジトリ設定から手動で取り込んでください。自分の `~/.codex/AGENTS.md` がある場合も、関連する部分だけを手動で merge し、丸ごと上書きしないでください。
+**インストール後**：最小化 / 手動インストールでは `config.toml` は**自動マージされません**。またプロジェクトローカル launcher も自動生成されないため、完全隔離が必要ならフルインストールを使ってください。
 
 ### オプション 3：選択インストール
 
@@ -153,12 +156,13 @@ cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-cp -r /tmp/claude-scholar/skills/<skill-name> ~/.codex/skills/
-cp -r /tmp/claude-scholar/agents/<agent-name> ~/.codex/agents/
-cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
+PROJECT_DIR=~/Downloads/codex-scholar
+cp -r /tmp/claude-scholar/skills/<skill-name> "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/agents/<agent-name> "$PROJECT_DIR/.codex/agents/"
+cp /tmp/claude-scholar/AGENTS.md "$PROJECT_DIR/AGENTS.md"
 ```
 
-**インストール後**：選択的 / 手動インストールでも `config.toml` は自動マージされません。既に `~/.codex/AGENTS.md` を持っている場合も、必要な内容だけを手動で merge してください。
+**インストール後**：選択的 / 手動インストールでも `config.toml` は自動マージされません。
 
 **Codex 利用メモ**：
 - Codex は `/...` メニューにカスタム skill を表示しません。

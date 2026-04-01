@@ -33,7 +33,7 @@ Resolve `project_kb.py` from one of these locations instead:
 
 1. installed Codex skill tree:
    ```bash
-   ${CODEX_HOME:-$HOME/.codex}/skills/obsidian-project-memory/scripts/project_kb.py
+   ${CODEX_HOME:-.codex}/skills/obsidian-project-memory/scripts/project_kb.py
    ```
 2. a checked-out Claude Scholar repository:
    ```bash
@@ -47,12 +47,12 @@ If you are running inside a normal research repo rather than inside the Claude S
 1. Identify the repository root.
 2. Run a preflight detect step first:
    ```bash
-   PROJECT_KB_SCRIPT="${CODEX_HOME:-$HOME/.codex}/skills/obsidian-project-memory/scripts/project_kb.py"
+   PROJECT_KB_SCRIPT="${CODEX_HOME:-.codex}/skills/obsidian-project-memory/scripts/project_kb.py"
    python3 "$PROJECT_KB_SCRIPT" detect --cwd "$PWD"
    ```
 3. Only if the repo is unbound and should be imported, run bootstrap:
    ```bash
-   PROJECT_KB_SCRIPT="${CODEX_HOME:-$HOME/.codex}/skills/obsidian-project-memory/scripts/project_kb.py"
+   PROJECT_KB_SCRIPT="${CODEX_HOME:-.codex}/skills/obsidian-project-memory/scripts/project_kb.py"
    python3 "$PROJECT_KB_SCRIPT" bootstrap --cwd "$PWD" --vault-path "$OBSIDIAN_VAULT_PATH"
    ```
 4. Verify that bootstrap created at least:

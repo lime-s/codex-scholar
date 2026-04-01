@@ -22,7 +22,7 @@ Refresh the markdown map only when:
 ## Recommended command
 
 ```bash
-LITERATURE_GRAPH_SCRIPT="${CODEX_HOME:-$HOME/.codex}/skills/obsidian-literature-workflow/scripts/build_literature_graph.py"
+LITERATURE_GRAPH_SCRIPT="${CODEX_HOME:-.codex}/skills/obsidian-literature-workflow/scripts/build_literature_graph.py"
 python3 "$LITERATURE_GRAPH_SCRIPT" --cwd "$PWD"
 ```
 

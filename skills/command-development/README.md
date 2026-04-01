@@ -130,7 +130,7 @@ Command prompt content with:
 ### Locations
 
 - **Project**: `.codex/commands/` (shared with team)
-- **Personal**: `~/.codex/commands/` (your commands)
+- **Personal**: `.codex/commands/` (your commands)
 - **Plugin**: `plugin-name/commands/` (plugin-specific)
 
 ### Key Features

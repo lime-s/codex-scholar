@@ -308,7 +308,7 @@ This skill consumes a **single canonical writing memory** maintained by `paper-m
 
 This memory is **global**, not project-specific.
 
-Even when `paper-miner` is invoked while working inside a specific repository, it still writes mined writing knowledge only into this one global memory. It does **not** maintain project-local writing memory.
+Even when `paper-miner` is invoked in a subtask, it still writes mined writing knowledge only into this one project-local canonical memory. It does **not** scatter updates across multiple per-task writing memories.
 
 ### Canonical memory structure
 
@@ -372,7 +372,7 @@ Read narrowly, not exhaustively:
 
 ### Contribution rule
 
-Every paper mined by `paper-miner` should improve the same global memory.
+Every paper mined by `paper-miner` should improve the same project-local canonical memory.
 
 Do not scatter newly mined knowledge across multiple maintained files.
 Do not create project-specific paper-miner memory.

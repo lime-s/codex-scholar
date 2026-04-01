@@ -2,18 +2,21 @@
 # ============================================================
 # Claude Scholar — Codex CLI Installer
 # ============================================================
-# Usage: bash scripts/setup.sh
+# Usage: bash scripts/setup.sh --project-dir /path/to/project
 # Supports fresh install and safer incremental updates.
 
 set -euo pipefail
 
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 AGENTS_MD_SIDECAR="AGENTS.scholar.md"
-BACKUP_ROOT="$CODEX_HOME/.codex-scholar-backups"
+PROJECT_ROOT=""
+CODEX_HOME=""
+AGENTS_TARGET_FILE=""
+LAUNCHER_TARGET_FILE=""
+BACKUP_ROOT=""
 BACKUP_STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP_DIR="$BACKUP_ROOT/$BACKUP_STAMP"
+BACKUP_DIR=""
 BACKUP_READY=0
 BACKUP_COUNT=0
 UPDATED_COUNT=0
@@ -43,6 +46,60 @@ declare -a PRESET_NAMES=("openai" "custom")
 declare -a PRESET_LABELS=("OpenAI (official)" "Custom provider")
 declare -a PRESET_URLS=("https://api.openai.com/v1" "")
 declare -a PRESET_MODELS=("gpt-5.4" "")
+
+show_help() {
+  cat <<'EOF'
+Usage:
+  bash scripts/setup.sh --project-dir /path/to/project
+
+Options:
+  --project-dir <dir>  Install Claude Scholar into <dir>/.codex and copy AGENTS.md to <dir>/AGENTS.md
+  --help               Show this help message
+
+Notes:
+  - This installer is project-local only. It does not write outside the target project.
+  - The installer also writes <project>/.codex/run-codex.sh so auth, sessions, and memories stay inside the project.
+EOF
+}
+
+resolve_abs_path() {
+  python3 - "$1" <<'PY'
+from pathlib import Path
+import sys
+
+print(Path(sys.argv[1]).expanduser().resolve())
+PY
+}
+
+configure_targets() {
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --project-dir)
+        shift
+        [ "$#" -gt 0 ] || error "--project-dir requires a path"
+        PROJECT_ROOT="$(resolve_abs_path "$1")"
+        CODEX_HOME="$PROJECT_ROOT/.codex"
+        ;;
+      -h|--help)
+        show_help
+        exit 0
+        ;;
+      *)
+        error "Unknown argument: $1"
+        ;;
+    esac
+    shift
+  done
+
+  if [ -z "$CODEX_HOME" ]; then
+    error "Project-local install requires --project-dir /path/to/project"
+  fi
+
+  AGENTS_TARGET_FILE="$PROJECT_ROOT/AGENTS.md"
+  LAUNCHER_TARGET_FILE="$CODEX_HOME/run-codex.sh"
+  BACKUP_ROOT="$CODEX_HOME/.codex-scholar-backups"
+  BACKUP_DIR="$BACKUP_ROOT/$BACKUP_STAMP"
+}
 
 ensure_backup_dir() {
   if [ "$BACKUP_READY" -eq 0 ]; then
@@ -125,8 +182,8 @@ copy_dir_safely() {
 
 install_agents_md() {
   local src_file="$1"
-  local target_file="$CODEX_HOME/AGENTS.md"
-  local sidecar_file="$CODEX_HOME/$AGENTS_MD_SIDECAR"
+  local target_file="$AGENTS_TARGET_FILE"
+  local sidecar_file="$(dirname "$AGENTS_TARGET_FILE")/$AGENTS_MD_SIDECAR"
 
   if [ -f "$target_file" ]; then
     warn "Preserving existing AGENTS.md"
@@ -136,6 +193,28 @@ install_agents_md() {
   fi
 
   copy_file_safely "$src_file" "$target_file"
+}
+
+write_project_launcher() {
+  local target="$LAUNCHER_TARGET_FILE"
+  ensure_parent_dir "$target"
+
+  if [ -f "$target" ]; then
+    backup_path "$target"
+  fi
+
+  cat > "$target" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_ROOT="$PROJECT_ROOT"
+export CODEX_HOME="$CODEX_HOME"
+
+exec codex -C "\$PROJECT_ROOT" "\$@"
+EOF
+
+  chmod 755 "$target"
+  UPDATED_COUNT=$((UPDATED_COUNT + 1))
 }
 
 # --- Auth/provider helpers ---
@@ -354,6 +433,7 @@ generate_fresh_config() {
   sed -e "s|__MODEL__|$MODEL|g" \
       -e "s|__PROVIDER_NAME__|$PROVIDER_NAME|g" \
       -e "s|__PROVIDER_URL__|$PROVIDER_URL|g" \
+      -e "s|__CODEX_HOME__|$CODEX_HOME|g" \
       "$template" > "$target"
   info "Generated config.toml (model=$MODEL, provider=$PROVIDER_NAME)"
 }
@@ -362,7 +442,7 @@ merge_scholar_config() {
   local target="$1"
   local template="$2"
 
-  TARGET_PATH="$target" TEMPLATE_PATH="$template" python3 <<'PY'
+  TARGET_PATH="$target" TEMPLATE_PATH="$template" CODEX_HOME_VALUE="$CODEX_HOME" python3 <<'PY'
 import os
 import pathlib
 import re
@@ -386,7 +466,7 @@ def extract_agent_sections(text: str):
 target_path = os.environ['TARGET_PATH']
 template_path = os.environ['TEMPLATE_PATH']
 target = read(target_path)
-template = read(template_path)
+template = read(template_path).replace('__CODEX_HOME__', os.environ['CODEX_HOME_VALUE'])
 added = []
 
 for section in ['features', 'mcp_servers.zotero', 'mcp_servers.zotero.env']:
@@ -482,6 +562,7 @@ copy_components() {
   if [ -d "$SRC_DIR/utils" ]; then
     copy_dir_safely "$SRC_DIR/utils" "$CODEX_HOME/utils"
   fi
+  write_project_launcher
 
   info "Synced repo-managed Codex components"
 }
@@ -516,6 +597,8 @@ PY
 }
 
 main() {
+  configure_targets "$@"
+
   echo ""
   echo "╔══════════════════════════════════════╗"
   echo "║   Claude Scholar Installer (Codex)   ║"
@@ -548,9 +631,11 @@ main() {
   echo "  Auth:    $CODEX_HOME/auth.json"
   echo "  Skills:  $CODEX_HOME/skills/"
   echo "  Agents:  $CODEX_HOME/agents/"
+  echo "  AGENTS:  $AGENTS_TARGET_FILE"
+  echo "  Launch:  $LAUNCHER_TARGET_FILE"
   echo ""
   info "Existing model/provider/API key settings are preserved when you choose the incremental update path."
-  echo "  Run $(bold 'codex') to start."
+  echo "  Run $(bold "$LAUNCHER_TARGET_FILE") to start with project-local CODEX_HOME."
   echo "============================================================"
 }
 

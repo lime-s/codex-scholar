@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Codex_CLI-Compatible-blue?style=flat-square" alt="Codex CLI"/>
   </p>
 
-  <strong>语言</strong>: <a href="README.md">English</a> | <a href="README.zh-CN.md">中文</a> | <a href="README.ja-JP.md">日本語</a>
+  <strong>语言</strong>: <a href="README.md">English</a> | <a href="README.zh-CN.md">中文</a>
 </div>
 
 > 面向学术研究和软件开发的半自动研究助手，尤其适合计算机科学与 AI 研究者，已适配 [Codex CLI](https://github.com/openai/codex)，覆盖研究构思、文献综述、实验、结果报告、写作与项目知识库维护。
@@ -18,16 +18,15 @@
 
 ## 最新动态
 
-- **2026-03-31**: **Zotero smart-import 工作流文档完成对齐** — 围绕最新 `zotero-mcp` 的公开能力，系统更新了 Claude Scholar 的研究工作流文档：将 `zotero_add_items_by_identifier` 明确为默认论文导入入口，把 `zotero_reconcile_collection_duplicates` 设为标准导入后清理步骤，更准确地说明了来源感知 PDF cascade，同时把公开工具与内部诊断能力的边界重新讲清楚了。
-- **2026-03-31**: **README 上手路径完成刷新** — 明确了 Claude Scholar 尤其适合计算机科学与 AI 研究者，在安装说明后补充了更贴近真实使用的上手场景，进一步收紧了 prerequisite / 分支说明，并把“如果用户本地已有 md 文件，需要手动 merge”这件事写得更明确。
-- **2026-03-31**: **安装器与 hooks 行为进一步收口** — 安装器现在会保留已有的本地 `AGENTS.md`，并把仓库版本作为 `AGENTS.scholar.md` sidecar 文件安装；同时默认 hooks 的摘要输出进一步降噪，减少 temp files / uncommitted files 的噪声，同时保留更安全的写入守卫边界。
-- **2026-03-31**: **日文文档补齐** — 为主 README 以及 `AGENTS`、`MCP_SETUP`、`OBSIDIAN_SETUP` 补充了日文文档，使 Codex 分支的多语言文档入口更完整。
+- **2026-03-18**: **实验结果报告、写作记忆与 README 对齐** — 保留了 `results-analysis` / `results-report` 的双层职责划分：前者负责严格统计与真实科研图，后者负责面向决策的实验后总结报告；继续保留 Obsidian 写回；从产品叙事中移除了旧的 `data-analyst` 入口；把 `paper-miner` 的输出沉淀到共享写作记忆，并让 `ml-paper-writing` 与 `review-response` 统一读取；同时把 Codex 分支 README 的结构向主分支主线对齐，但保留 Codex 专有用法说明。
+- **2026-03-17**: **Obsidian 项目知识库** — 已将以文件系统为核心的 Obsidian 工作流迁入 Codex 版，支持项目导入、repo 绑定后的自动同步，将稳定知识路由到 `Papers / Knowledge / Experiments / Results / Writing`，并将具体轮次的实验报告存放在 `Results/Reports/` 下，且 Obsidian 侧不依赖 MCP。
+- **2026-02-26**: **Zotero MCP Web API 模式** — 支持远程 Zotero 访问、DOI/arXiv/URL 导入、集合管理、条目更新，并补充了 Codex `config.toml` 配置说明。
 
 <details>
 <summary>查看历史更新日志</summary>
 
 - **2026-02-25**: **Codex CLI 迁移** — 将项目迁入 Codex CLI 形态，包含 TOML 配置、agent 目录、基于 AGENTS 的工作约束与增量安装器
-- **2026-02-23**: 新增 `setup.sh` 安装脚本 — 面向已有 `~/.codex` 的带备份增量更新，并支持保留现有配置与可选启用 Zotero MCP
+- **2026-02-23**: 新增 `setup.sh` 安装脚本 — 支持把 Claude Scholar 增量安装到项目内 `.codex/`，并保留现有配置与可选启用 Zotero MCP
 - **2026-02-22**: 新增 Zotero MCP 模板 — 在 Codex 中提供开箱即用的文献工作流模板
 - **2026-02-21**: 完成 OpenCode 迁移铺垫 — 明确 Claude Code、Codex、OpenCode 三条分支线的分工
 - **2026-02-15**: Zotero MCP 集成 — 将 `/zotero-review`、`/zotero-notes` 风格的文献工作流并入更大的 Claude Scholar 主线
@@ -42,8 +41,7 @@
 |---|---|
 | [为什么使用 Claude Scholar](#为什么使用-claude-scholar) | 快速理解项目定位与适用场景。 |
 | [核心工作流](#核心工作流) | 查看从研究构思到发表的分阶段主链路。 |
-| [快速开始](#快速开始) | 安全地安装到现有 `~/.codex` 环境。 |
-| [上手场景](#上手场景) | 查看安装完成后几种最常见的上手场景。 |
+| [快速开始](#快速开始) | 安全地安装到当前项目的 `.codex/` 环境。 |
 | [平台范围](#平台范围) | 了解这个分支覆盖什么，以及其他版本在哪。 |
 | [集成能力](#集成能力) | 了解 Zotero 和 Obsidian 如何接入 Codex 工作流。 |
 | [主要工作流](#主要工作流) | 浏览核心研究与开发工作流。 |
@@ -101,51 +99,54 @@ Claude Scholar 当前尤其适合：
 - （可选）[Zotero](https://www.zotero.org/) + [Galaxy-Dawn/zotero-mcp](https://github.com/Galaxy-Dawn/zotero-mcp) 用于文献工作流
 - （可选）[Obsidian](https://obsidian.md/) 用于项目知识库工作流
 
-### 选项 1：完整安装（推荐）
+### 选项 1：项目本地安装（推荐）
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-bash /tmp/claude-scholar/scripts/setup.sh
+bash /tmp/claude-scholar/scripts/setup.sh --project-dir ~/Downloads/codex-scholar
+cd ~/Downloads/codex-scholar
+./.codex/run-codex.sh
 ```
 
 安装器现在支持**带备份的安全增量更新**：
+- 把 Claude Scholar 安装到目标项目的 `.codex/` 下
 - 同步仓库托管的 `skills/`、`agents/`、`scripts/` 与 `utils/`
-- 当你选择保留现有 provider/model 时，把 Claude Scholar 所需 section 合并进现有 `~/.codex/config.toml`
-- 覆盖前自动备份 `config.toml` 与 `auth.json`
-- 如果已存在 `~/.codex/AGENTS.md`，则保留原文件，并把仓库版本另存为 `~/.codex/AGENTS.scholar.md`
+- 当你选择保留现有 provider/model 时，把 Claude Scholar 所需 section 合并进目标项目的 `.codex/config.toml`
+- 覆盖前自动备份项目本地的 `config.toml` 与 `auth.json`
+- 把仓库的 `AGENTS.md` 安装到目标项目根目录，供 Codex 自动读取
+- 生成 `./.codex/run-codex.sh`，启动时自动导出项目本地 `CODEX_HOME`，把 auth / sessions / memories 一起隔离到该项目
 - 在增量更新路径下保留现有 provider / model / API key
 - 可选启用模板中已经存在的 Zotero MCP 配置块
-
-**重要 AGENTS 说明**：如果你原来就有自己的 `~/.codex/AGENTS.md`，安装后请查看 `~/.codex/AGENTS.scholar.md`，并将其中你需要的 Claude Scholar 内容按需 merge 到你自己的 `AGENTS.md` 里；不要假设这个 sidecar 文件会自动生效。
 
 以后做增量更新时：
 
 ```bash
 cd /tmp/claude-scholar
 git pull --ff-only
-bash scripts/setup.sh
+bash scripts/setup.sh --project-dir ~/Downloads/codex-scholar
 ```
 
 **Windows**：请使用 Git Bash / WSL 运行安装脚本。
 
-### 选项 2：最小化安装
+### 选项 2：最小化项目本地安装
 
 只安装较小的一组研究工作流子集：
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-mkdir -p ~/.codex/skills ~/.codex/agents
-cp -r /tmp/claude-scholar/skills/research-ideation ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/results-analysis ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/results-report ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/ml-paper-writing ~/.codex/skills/
-cp -r /tmp/claude-scholar/skills/review-response ~/.codex/skills/
-cp -r /tmp/claude-scholar/agents/literature-reviewer ~/.codex/agents/
-cp -r /tmp/claude-scholar/agents/paper-miner ~/.codex/agents/
-cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
+PROJECT_DIR=~/Downloads/codex-scholar
+mkdir -p "$PROJECT_DIR/.codex/skills" "$PROJECT_DIR/.codex/agents"
+cp -r /tmp/claude-scholar/skills/research-ideation "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/results-analysis "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/results-report "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/ml-paper-writing "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/skills/review-response "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/agents/literature-reviewer "$PROJECT_DIR/.codex/agents/"
+cp -r /tmp/claude-scholar/agents/paper-miner "$PROJECT_DIR/.codex/agents/"
+cp /tmp/claude-scholar/AGENTS.md "$PROJECT_DIR/AGENTS.md"
 ```
 
-**安装后**：最小化/手动安装**不会自动合并** `config.toml`；请根据需要手动复制仓库配置与 setup 文档里的相关 section。如果你已经有自己的 `~/.codex/AGENTS.md`，也请把仓库 `AGENTS.md` 中相关内容按需 merge 到你的文件里，而不是直接覆盖。
+**安装后**：最小化/手动安装**不会自动合并** `config.toml`，也不会自动生成项目本地启动包装器；如果你需要完整隔离的 `CODEX_HOME`，请优先使用完整安装。
 
 ### 选项 3：选择性安装
 
@@ -153,69 +154,15 @@ cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
 
 ```bash
 git clone -b codex https://github.com/Galaxy-Dawn/claude-scholar.git /tmp/claude-scholar
-cp -r /tmp/claude-scholar/skills/<skill-name> ~/.codex/skills/
-cp -r /tmp/claude-scholar/agents/<agent-name> ~/.codex/agents/
-cp /tmp/claude-scholar/AGENTS.md ~/.codex/AGENTS.md
+PROJECT_DIR=~/Downloads/codex-scholar
+cp -r /tmp/claude-scholar/skills/<skill-name> "$PROJECT_DIR/.codex/skills/"
+cp -r /tmp/claude-scholar/agents/<agent-name> "$PROJECT_DIR/.codex/agents/"
+cp /tmp/claude-scholar/AGENTS.md "$PROJECT_DIR/AGENTS.md"
 ```
-
-**安装后**：选择性/手动安装不仅不会自动合并 `config.toml`，如果你已经有自己的 `~/.codex/AGENTS.md`，也请把仓库 `AGENTS.md` 中相关内容按需 merge 到你的文件里，而不是直接覆盖。
 
 **Codex 使用说明**：
 - Codex **不会**在 `/...` 菜单里列出自定义 skills。
 - 优先使用自然语言触发；必要时可显式写 `$skill-name`。
-
-## 上手场景
-
-安装完成后，最简单的上手方式就是直接用自然语言描述你的任务，不需要先把整套系统全部背下来；在 Codex 里，这些工作流也不依赖你先去记 slash 菜单。下面给几种最常见、也最实用的起步场景。
-
-### 1. 启动一个新的研究主题
-**你可以这样说：**
-> 帮我围绕[你的研究主题]启动研究。我想先得到一个基于文献的初步计划、关键开放问题，以及接下来最具体的推进步骤。
-
-**Claude Scholar 通常会帮助你：**
-- 澄清主题并收敛研究问题，
-- 给出值得优先看的文献方向，
-- 形成初始研究计划或假设列表，
-- 如果你在用 Zotero / Obsidian，还可以把工作进一步路由进去。
-
-### 2. 回顾一个 Zotero 文献集合
-**你可以这样说：**
-> 帮我回顾我在 Zotero 里关于 brain foundation models 的文献集合，并总结其中的主要方向、研究空白，以及最值得继续推进的下一步。
-
-**典型输出包括：**
-- 按主题分组的论文图景，
-- 一段简明文献综合，
-- research gap 分析，
-- 值得继续推进的候选研究方向。
-
-### 3. 分析已经完成的实验结果
-**你可以这样说：**
-> 帮我分析这个实验目录里的结果，看看不同 runs 之间到底变了什么，并输出一份面向决策的总结。
-
-**典型输出包括：**
-- 指标对比，
-- ablation 或 error analysis 建议，
-- 一份结果总结，说明哪些结论比较稳、哪些还不够稳、下一步该跑什么。
-
-### 4. 起草论文段落或 rebuttal 回复
-**你可以这样说：**
-> 请基于这个项目当前已有的发现和论文笔记，帮我起草相关工作这一节。
-
-或者：
-
-> 请根据这些审稿人意见，帮我起草一版 rebuttal。
-
-**典型输出包括：**
-- 结构化的段落草稿，
-- 更清楚的论证链条，
-- claims 与 evidence 的对应关系，
-- 还需要补验证或补材料的点。
-
-### 使用建议
-- 先从一个具体任务开始，而不是一上来让系统“把所有事情都做了”。
-- 在 Codex 里，自然语言是默认入口；只有当你想强制调用某个 skill 时，才需要显式写 `$skill-name`。
-- 如果你已经有自己的本地 `AGENTS.md` 文件，请把你需要的 Claude Scholar 内容从 `AGENTS.scholar.md` 里按需 merge 进去，不要假设 sidecar 文件会自动生效。
-- Zotero 和 Obsidian 都不是强制的，但如果你希望得到 durable literature notes 或 project memory，而不是一次性聊天输出，它们会非常有帮助。
 
 ## 平台范围
 
@@ -460,7 +407,6 @@ Claude Scholar 也包含一套自我改进的 skill 工作流。
 - [MCP_SETUP.zh-CN.md](./MCP_SETUP.zh-CN.md) — Codex 版 Zotero MCP 配置说明
 - [OBSIDIAN_SETUP.zh-CN.md](./OBSIDIAN_SETUP.zh-CN.md) — Obsidian 项目知识库工作流
 - [AGENTS.md](./AGENTS.md) — Codex 会话规则、安全约束与工作流说明
-- [README.ja-JP.md](./README.ja-JP.md) — 本 README 的日文版
 - [config.toml](./config.toml) — 包含 skills、agents 与 MCP 配置块的 Codex 模板配置
 
 ## 项目规则

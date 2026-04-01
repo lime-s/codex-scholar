@@ -149,7 +149,7 @@ claude --debug
 # Verify expected behavior
 
 # 5. Check debug logs
-tail -f ~/.codex/debug-logs/latest
+tail -f .codex/debug-logs/latest
 # Look for errors or warnings
 ```
 

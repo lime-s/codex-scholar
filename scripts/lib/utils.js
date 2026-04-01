@@ -85,40 +85,47 @@ function runCommand(cmd, options = {}) {
 }
 
 /**
- * 获取 Codex 配置目录（跨平台）
- * @returns {string} Codex 配置目录路径
- */
-function getCodexConfigDir() {
-  const homeDir = getHomeDir();
-  return path.join(homeDir, '.codex');
-}
-
-/**
  * 获取项目根目录（跨平台）
  * @param {string} startDir - 起始目录
  * @returns {string|null} 项目根目录或 null
  */
 function getProjectRoot(startDir = process.cwd()) {
-  let currentDir = startDir;
+  let currentDir = path.resolve(startDir);
+  const markers = ['.git', '.codex', 'AGENTS.md', 'package.json', '.claude-plugin'];
 
-  while (currentDir !== path.parse(currentDir).root) {
-    // 检查是否存在 .claude-plugin 目录（Claude Code plugin repo）
-    const pluginDir = path.join(currentDir, '.claude-plugin');
-    if (fs.existsSync(pluginDir)) {
-      return currentDir;
+  while (true) {
+    for (const marker of markers) {
+      if (fs.existsSync(path.join(currentDir, marker))) {
+        return currentDir;
+      }
     }
 
-    // 检查是否存在 package.json
-    const packageJson = path.join(currentDir, 'package.json');
-    if (fs.existsSync(packageJson)) {
-      return currentDir;
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      break;
     }
-
-    // 向上移动
-    currentDir = path.dirname(currentDir);
+    currentDir = parentDir;
   }
 
   return null;
+}
+
+/**
+ * 获取 Codex 配置目录（跨平台）
+ * 优先级：CODEX_HOME > repo-local .codex > cwd-local .codex
+ * @returns {string} Codex 配置目录路径
+ */
+function getCodexConfigDir(startDir = process.cwd()) {
+  if (process.env.CODEX_HOME) {
+    return path.resolve(process.env.CODEX_HOME);
+  }
+
+  const projectRoot = getProjectRoot(startDir);
+  if (projectRoot) {
+    return path.join(projectRoot, '.codex');
+  }
+
+  return path.join(path.resolve(startDir), '.codex');
 }
 
 /**

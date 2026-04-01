@@ -6,7 +6,7 @@
 2. If the repo is already bound, stop and reuse the existing project.
 3. If the repo is not research-like, stop and ask for confirmation instead of forcing bootstrap.
 4. If `OBSIDIAN_VAULT_PATH` is missing, request it explicitly.
-5. In Codex, resolve `project_kb.py` from `${CODEX_HOME:-$HOME/.codex}/skills/...` or from a checked-out Claude Scholar repo; do not assume `${CLAUDE_PLUGIN_ROOT}` exists.
+5. In Codex, resolve `project_kb.py` from `${CODEX_HOME:-.codex}/skills/...` or from a checked-out Claude Scholar repo; do not assume `${CLAUDE_PLUGIN_ROOT}` exists.
 
 ## Common failure modes
 

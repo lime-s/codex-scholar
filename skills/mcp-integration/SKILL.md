@@ -6,7 +6,7 @@ version: 0.1.0
 
 # MCP Integration for Claude Code Plugins
 
-> **Scope note**: This skill mainly documents **Claude Code plugin MCP integration**, not a Codex-native plugin system. In Codex CLI, MCP is configured through `~/.codex/config.toml` under `[mcp_servers]`.
+> **Scope note**: This skill mainly documents **Claude Code plugin MCP integration**, not a Codex-native plugin system. In Codex CLI, MCP is configured through `.codex/config.toml` under `[mcp_servers]`.
 
 ## Overview
 

@@ -6,7 +6,7 @@ tags: [Memory, Configuration, Sync, Workflow]
 
 # Memory Updater
 
-Check and update the CLAUDE.md global memory file, ensuring its content stays synchronized with source files for skills, commands, agents, and hooks.
+Check and update the project-local CLAUDE.md memory file, ensuring its content stays synchronized with source files for skills, commands, agents, and hooks.
 
 ## Overview
 
@@ -21,14 +21,14 @@ When these source files change, CLAUDE.md needs to be updated accordingly.
 ## Detection Logic
 
 1. **Scan Source File Modification Times**
-   - `~/.codex/skills/**/skill.md`
-   - `~/.codex/commands/**/*.md`
-   - `~/.codex/agents/**/*.md`
-   - `~/.codex/hooks/**/*.{js,json}`
+   - `.codex/skills/**/skill.md`
+   - `.codex/commands/**/*.md`
+   - `.codex/agents/**/*.md`
+   - `.codex/hooks/**/*.{js,json}`
 
 2. **Compare Against CLAUDE.md Last Modified Time**
    - If any source file is newer than CLAUDE.md, an update is needed
-   - Track last sync timestamp via `~/.codex/.last-memory-sync`
+   - Track last sync timestamp via `.codex/.last-memory-sync`
 
 3. **Generate Report**
    - List all changed source files
