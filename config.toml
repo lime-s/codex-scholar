@@ -9,11 +9,7 @@ model_provider = "__PROVIDER_NAME__"
 model_reasoning_effort = "medium"
 disable_response_storage = true
 
-[model_providers.__PROVIDER_NAME__]
-name = "__PROVIDER_NAME__"
-base_url = "__PROVIDER_URL__"
-wire_api = "responses"
-requires_openai_auth = true
+__MODEL_PROVIDER_SECTION__
 
 # ============================================================
 # Sandbox & Instructions

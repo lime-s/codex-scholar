@@ -429,12 +429,33 @@ configure_api_key() {
 generate_fresh_config() {
   local template="$1"
   local target="$2"
+  local provider_section=""
 
-  sed -e "s|__MODEL__|$MODEL|g" \
-      -e "s|__PROVIDER_NAME__|$PROVIDER_NAME|g" \
-      -e "s|__PROVIDER_URL__|$PROVIDER_URL|g" \
-      -e "s|__CODEX_HOME__|$CODEX_HOME|g" \
-      "$template" > "$target"
+  if [ "$PROVIDER_NAME" != "openai" ]; then
+    provider_section=$(cat <<EOF
+[model_providers.$PROVIDER_NAME]
+name = "$PROVIDER_NAME"
+base_url = "$PROVIDER_URL"
+wire_api = "responses"
+requires_openai_auth = true
+EOF
+)
+  fi
+
+  TEMPLATE_PATH="$template" TARGET_PATH="$target" MODEL_VALUE="$MODEL" PROVIDER_NAME_VALUE="$PROVIDER_NAME" CODEX_HOME_VALUE="$CODEX_HOME" PROVIDER_SECTION_VALUE="$provider_section" python3 <<'PY'
+import os
+import pathlib
+
+template = pathlib.Path(os.environ["TEMPLATE_PATH"]).read_text()
+rendered = (
+    template
+    .replace("__MODEL__", os.environ["MODEL_VALUE"])
+    .replace("__PROVIDER_NAME__", os.environ["PROVIDER_NAME_VALUE"])
+    .replace("__CODEX_HOME__", os.environ["CODEX_HOME_VALUE"])
+    .replace("__MODEL_PROVIDER_SECTION__", os.environ["PROVIDER_SECTION_VALUE"])
+)
+pathlib.Path(os.environ["TARGET_PATH"]).write_text(rendered)
+PY
   info "Generated config.toml (model=$MODEL, provider=$PROVIDER_NAME)"
 }
 
