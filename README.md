@@ -389,7 +389,7 @@ Codex does not expose native Claude Code hooks, so this branch emulates the high
 | Type | Name | One-line explanation |
 |---|---|---|
 | File | `AGENTS.md` | Encodes session discipline, skill evaluation rules, safety rules, and Codex-specific workflow instructions. |
-| Script | `scripts/codex_hook_emulation.py` | Emulates session-start, preflight, post-edit, and session-end behaviors inside repo workflows. |
+| Script | `scripts/codex_hook_emulation.py` | Installed into project-local `"$CODEX_HOME/scripts/"`; emulates session-start, preflight, post-edit, and session-end behaviors inside repo workflows. |
 | Skill | `session-wrap-up` | Produces work logs, cleanup reminders, and closeout summaries at the end of a session. |
 
 **How it works**

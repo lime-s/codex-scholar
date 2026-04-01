@@ -421,7 +421,7 @@ Codex は Claude Code のネイティブ hooks を提供しないため、この
 | 種類 | 名前 | 一行説明 |
 |---|---|---|
 | File | `AGENTS.md` | セッション規律、skill 評価規則、安全規則、Codex 専用ワークフロー説明を記述する |
-| Script | `scripts/codex_hook_emulation.py` | repo ワークフロー内で session-start、preflight、post-edit、session-end を模擬する |
+| Script | `scripts/codex_hook_emulation.py` | インストール後は project-local `"$CODEX_HOME/scripts/"` に配置され、repo ワークフロー内で session-start、preflight、post-edit、session-end を模擬する |
 | Skill | `session-wrap-up` | セッション終了時に作業ログ、清理リマインド、締めサマリを生成する |
 
 **進め方**

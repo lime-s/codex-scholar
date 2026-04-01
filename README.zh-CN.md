@@ -364,7 +364,7 @@ Codex 不提供原生 Claude Code hooks，所以这个分支通过 AGENTS 工作
 | 类型 | 名字 | 一句话解释 |
 |---|---|---|
 | File | `AGENTS.md` | 编码会话约束、skill 评估规则、安全规则和 Codex 专用工作流说明。 |
-| Script | `scripts/codex_hook_emulation.py` | 在仓库工作流内模拟 session-start、preflight、post-edit、session-end 行为。 |
+| Script | `scripts/codex_hook_emulation.py` | 安装后位于项目本地 `"$CODEX_HOME/scripts/"`，在仓库工作流内模拟 session-start、preflight、post-edit、session-end 行为。 |
 | Skill | `session-wrap-up` | 在会话结束时生成工作日志、清理提醒和收尾总结。 |
 
 **工作方式**
