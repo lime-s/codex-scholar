@@ -312,7 +312,7 @@ For complex problems, use split-role sub-agents:
 
 When starting a new session, ALWAYS:
 1. Run `python3 "$CODEX_HOME/scripts/codex_hook_emulation.py" session-start --cwd "$PWD"` when `"$CODEX_HOME/scripts/codex_hook_emulation.py"` exists
-2. Check git status and display current branch + uncommitted changes only when the current directory is a git repository
+2. Check git status and display current branch + uncommitted changes
 3. List available skills relevant to the current project context
 4. Show recent TODOs if any exist
 5. Display a brief summary of the project state
@@ -358,7 +358,7 @@ When the user says "wrap up", "总结", "session end", or similar:
 2. Generate a work log summarizing what was accomplished
 3. Check if AGENTS.md needs updates based on changes made
 4. Remind about any temporary files that should be cleaned up
-5. Show git status for uncommitted changes only when the current directory is a git repository
+5. Show git status for uncommitted changes
 
 ---
 
